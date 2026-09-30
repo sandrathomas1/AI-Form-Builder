@@ -7,6 +7,17 @@ class DocTypeGenerator:
 		if frappe.db.exists("DocType", name):
 			frappe.throw(_("DocType {0} already exists; it was not overwritten.").format(name))
 		fields = []
+		fields.append(
+			{
+				"label": "AI Form Template",
+				"fieldname": "ai_form_template",
+				"fieldtype": "Link",
+				"options": "AI Form Template",
+				"hidden": 1,
+				"read_only": 1,
+				"default": template.name,
+			}
+		)
 		for section in sorted(template.sections, key=lambda row: row.sequence or 0):
 			fields.append(
 				{

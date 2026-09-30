@@ -14,11 +14,18 @@ def analyze_template(template_name: str):
 	file_doc = frappe.get_doc("File", {"file_url": template.source_pdf})
 	inspection = PDFAnalyzer().inspect(file_doc.get_full_path())
 	settings = frappe.get_single("AI Form Builder Settings")
-	provider = OpenAIProvider(settings.get_password("api_key"), settings.ai_model)
+	if len(inspection["pages"]) > (settings.maximum_pages or 20):
+		frappe.throw(_("PDF exceeds the configured maximum page count."))
 	template.db_set("status", "Analyzing")
 	template.db_set("analysis_started_at", now_datetime())
 	try:
-		analysis = validate_analysis(provider.analyze_document(inspection))
+		analysis = PDFAnalyzer().acroform_analysis(inspection)
+		if not analysis:
+			provider = OpenAIProvider(settings.get_password("api_key"), settings.ai_model)
+			analysis = provider.analyze_document(
+				inspection, PDFAnalyzer().render_page_images(file_doc.get_full_path())
+			)
+		analysis = validate_analysis(analysis)
 		template.set("sections", [])
 		for item in analysis.get("sections", []):
 			template.append(

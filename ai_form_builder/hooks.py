@@ -9,6 +9,8 @@ doctype_js = {
 	"AI Form Template": "public/js/ai_form_template.js",
 }
 
+app_include_css = "/assets/ai_form_builder/css/form_mapping_editor.css"
+
 fixtures = [
 	{"dt": "Role", "filters": [["name", "in", ["AI Form Builder Manager", "AI Form Builder User"]]]},
 ]

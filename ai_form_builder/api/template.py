@@ -1,7 +1,9 @@
 import frappe
 from frappe import _
+from frappe.utils import cint
 
 from ai_form_builder.services.template_service import analyze_template as run_analysis
+from ai_form_builder.utils.validation import validate_mapping
 
 
 def _manager():
@@ -66,3 +68,33 @@ def get_template_fields(template_name):
 		for row in template.fields
 		if not row.ignore_field
 	]
+
+
+@frappe.whitelist()
+def save_mapping(template_name, fields, sections=None):
+	"""Replace mapping rows after validating browser-provided values server-side."""
+	_manager()
+	template = frappe.get_doc("AI Form Template", template_name)
+	template.check_permission("write")
+	if template.status not in {"Review Required", "Approved"}:
+		frappe.throw(_("Analyze the template before editing its mapping."))
+	fields = frappe.parse_json(fields)
+	sections = frappe.parse_json(sections or "[]")
+	if not isinstance(fields, list) or not isinstance(sections, list):
+		frappe.throw(_("Mapping must contain field and section lists."))
+	template.set("fields", [])
+	fieldnames = set()
+	for row in fields:
+		mapping = template.append("fields", row)
+		mapping.page_number = cint(mapping.page_number)
+		validate_mapping(mapping, template.number_of_pages)
+		if not mapping.ignore_field and mapping.fieldname in fieldnames:
+			frappe.throw(_("Fieldnames must be unique."))
+		fieldnames.add(mapping.fieldname)
+	template.set("sections", [])
+	for row in sections:
+		if not row.get("section_label") or not row.get("section_key"):
+			frappe.throw(_("Every section needs a label and stable key."))
+		template.append("sections", row)
+	template.save()
+	return get_template_fields(template.name)
