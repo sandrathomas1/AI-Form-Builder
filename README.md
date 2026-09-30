@@ -1,6 +1,6 @@
 ### AI Form Builder
 
-Standalone Frappe app for analyzing untrusted PDF templates, reviewing data-only field mappings, generating custom DocTypes, and rendering saved values onto a fresh copy of the original PDF.
+AI Form Builder is a standalone Frappe app that converts existing PDF forms into digital forms using AI. It analyzes untrusted PDF templates, provides reviewable data-only field mappings, generates custom DocTypes, and renders saved values onto a fresh copy of the original PDF.
 
 ### Installation
 
