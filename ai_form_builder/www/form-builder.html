@@ -10,5 +10,5 @@
   <section class="afbp-card"><div class="afbp-step">02 — WORKSPACE</div><h2>Recent templates</h2><div id="template-list" class="afbp-list">Loading templates…</div></section>
   {% endif %}
 </main>
-<script>window.afbp={{ {"csrf": csrf_token, "can_manage": can_manage}|tojson }};</script><script src="/assets/ai_form_builder/js/form_builder_portal.js"></script>
+<script>window.afbp={csrf:"{{ csrf_token }}",can_manage:{{ 1 if can_manage else 0 }}};</script><script src="/assets/ai_form_builder/js/form_builder_portal.js"></script>
 {% endblock %}
