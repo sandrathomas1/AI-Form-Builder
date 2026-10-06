@@ -11,6 +11,30 @@ def _manager():
 
 
 @frappe.whitelist()
+def create_template_from_upload(template_title, template_code, source_pdf, document_category="Form"):
+	"""Website frontend entrypoint; file upload remains Frappe's standard endpoint."""
+	_manager()
+	if not source_pdf or not source_pdf.lower().endswith(".pdf"):
+		frappe.throw(_("Upload a PDF file before creating the template."))
+	doc = frappe.get_doc({
+		"doctype": "AI Form Template", "template_title": template_title,
+		"template_code": template_code, "source_pdf": source_pdf,
+		"document_category": document_category,
+	}).insert()
+	return {"name": doc.name, "status": doc.status}
+
+
+@frappe.whitelist()
+def get_client_templates():
+	"""Small, role-checked data set for the client-facing landing page."""
+	_manager()
+	return frappe.get_all(
+		"AI Form Template", fields=["name", "template_title", "status", "generated_doctype", "modified"],
+		order_by="modified desc", limit_page_length=20,
+	)
+
+
+@frappe.whitelist()
 def analyze_template(template_name):
 	_manager()
 	template = frappe.get_doc("AI Form Template", template_name)

@@ -1,0 +1,14 @@
+{% extends "templates/web.html" %}
+{% block page_content %}
+<link rel="stylesheet" href="/assets/ai_form_builder/css/form_builder_portal.css">
+<main class="afbp-shell">
+  <section class="afbp-hero"><p class="eyebrow">DOCUMENT AUTOMATION</p><h1>Build a form from your PDF.</h1><p>Upload a source PDF, review the detected fields, and generate one reusable Frappe form.</p></section>
+  {% if not logged_in %}<section class="afbp-card"><h2>Sign in to begin</h2><a class="btn btn-primary" href="/login?redirect-to=/form-builder">Sign in</a></section>
+  {% elif not can_manage %}<section class="afbp-card"><h2>Access required</h2><p>Your account can use published forms, but an AI Form Builder Manager creates templates.</p></section>
+  {% else %}
+  <section class="afbp-card"><div class="afbp-step">01 — UPLOAD</div><h2>Create a PDF template</h2><div class="afbp-grid"><label>Form title<input id="template-title" placeholder="e.g. IMTE Register" required></label><label>Template code<input id="template-code" placeholder="e.g. IMTE-REGISTER-001" required></label><label>Category<select id="document-category"><option>Form</option><option>Checklist</option><option>Register</option><option>Report</option><option>Other</option></select></label></div><label class="afbp-drop"><input id="source-pdf" type="file" accept="application/pdf"><span>Choose a PDF file</span><small>PDF only</small></label><button id="create-template" class="btn btn-primary">Upload &amp; Analyze PDF</button><p id="upload-status" class="afbp-status"></p></section>
+  <section class="afbp-card"><div class="afbp-step">02 — WORKSPACE</div><h2>Recent templates</h2><div id="template-list" class="afbp-list">Loading templates…</div></section>
+  {% endif %}
+</main>
+<script>window.afbp={{ {"csrf": frappe.sessions.get_csrf_token(), "can_manage": can_manage}|tojson }};</script><script src="/assets/ai_form_builder/js/form_builder_portal.js"></script>
+{% endblock %}
