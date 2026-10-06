@@ -5,14 +5,19 @@ import fitz
 import frappe
 from frappe.utils import format_value
 
+from ai_form_builder.services.project_form_service import get_document_configuration
+
 
 class PDFRenderer:
 	def render(self, template, document) -> bytes:
 		file_doc = frappe.get_doc("File", {"file_url": template.source_pdf})
 		pdf = fitz.open(file_doc.get_full_path())
 		overflowed = []
+		configuration, _ = get_document_configuration(template, document)
 		for field in template.fields:
 			if field.ignore_field or not field.is_printable or field.page_number > len(pdf):
+				continue
+			if configuration and not configuration.get(field.fieldname, {"enabled": True})["enabled"]:
 				continue
 			value = document.get(field.existing_field_mapping or field.fieldname)
 			if value in (None, ""):

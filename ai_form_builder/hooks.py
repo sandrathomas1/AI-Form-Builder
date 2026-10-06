@@ -7,6 +7,15 @@ app_license = "mit"
 
 doctype_js = {
 	"AI Form Template": "public/js/ai_form_template.js",
+	"AI Project Form Configuration": "public/js/ai_project_form_configuration.js",
+}
+
+app_include_js = "/assets/ai_form_builder/js/project_form_runtime.js"
+
+doc_events = {
+	"*": {
+		"validate": "ai_form_builder.services.project_form_service.validate_project_form",
+	}
 }
 
 app_include_css = "/assets/ai_form_builder/css/form_mapping_editor.css"

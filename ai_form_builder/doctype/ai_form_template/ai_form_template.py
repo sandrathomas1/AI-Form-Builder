@@ -8,6 +8,8 @@ from ai_form_builder.utils.validation import validate_mapping
 class AIFormTemplate(Document):
 	def validate(self):
 		self._validate_source_pdf()
+		if self.enable_project_configuration and not self.reference_doctype:
+			frappe.throw(_("Reference DocType is required when Project Configuration is enabled."))
 		for field in self.fields:
 			validate_mapping(field, self.number_of_pages or None)
 

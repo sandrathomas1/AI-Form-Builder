@@ -4,3 +4,4 @@
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
+ai_form_builder.patches.v0_0.add_project_form_runtime_metadata.execute
