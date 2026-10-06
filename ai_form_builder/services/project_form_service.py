@@ -61,6 +61,26 @@ def populate_fields(configuration, preserve=True):
 	return configuration
 
 
+def reset_fields_to_master(configuration):
+	"""Reset only the UI overlay; generated fields and saved values are untouched."""
+	template = get_template(configuration.form_template)
+	configuration.set("fields", [])
+	for source in template_rows(template):
+		configuration.append(
+			"fields",
+			{
+				"fieldname": source.fieldname,
+				"field_label": source.label,
+				"enabled": 1,
+				"mandatory": cint(source.mandatory),
+				"read_only": cint(source.read_only),
+				"label_override": "",
+				"is_system_field": 0,
+			},
+		)
+	return configuration
+
+
 def find_configuration(reference_doctype, reference_name, form_template):
 	if not all((reference_doctype, reference_name, form_template)):
 		return None

@@ -3,7 +3,7 @@ from io import BytesIO
 
 import fitz
 import frappe
-from frappe.utils import format_value
+from frappe.utils.formatters import format_value
 
 from ai_form_builder.services.project_form_service import get_document_configuration
 

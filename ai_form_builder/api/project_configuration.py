@@ -6,7 +6,11 @@ from ai_form_builder.services.project_form_service import (
 	get_template,
 )
 
-from ai_form_builder.services.project_form_service import find_configuration, populate_fields
+from ai_form_builder.services.project_form_service import (
+	find_configuration,
+	populate_fields,
+	reset_fields_to_master,
+)
 
 
 def _manager():
@@ -66,6 +70,16 @@ def sync_configuration_fields(configuration_name):
 	doc = frappe.get_doc("AI Project Form Configuration", configuration_name)
 	doc.check_permission("write")
 	populate_fields(doc)
+	doc.save()
+	return doc.as_dict()
+
+
+@frappe.whitelist()
+def reset_configuration_to_master(configuration_name):
+	_manager()
+	doc = frappe.get_doc("AI Project Form Configuration", configuration_name)
+	doc.check_permission("write")
+	reset_fields_to_master(doc)
 	doc.save()
 	return doc.as_dict()
 

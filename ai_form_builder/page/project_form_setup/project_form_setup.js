@@ -25,6 +25,11 @@ frappe.pages["project-form-setup"].on_page_load = function (wrapper) {
 		const dialog = new frappe.ui.Dialog({title: __("Configure Fields"), fields: [{fieldname: "fields", fieldtype: "Table", label: __("Fields"), cannot_add_rows: true, in_place_edit: true, data: doc.fields, fields: [
 			{fieldname:"field_label", label:__("Field"), fieldtype:"Data", read_only:1, in_list_view:1}, {fieldname:"enabled", label:__("Show"), fieldtype:"Check", in_list_view:1}, {fieldname:"mandatory", label:__("Mandatory"), fieldtype:"Check", in_list_view:1}, {fieldname:"read_only", label:__("Read Only"), fieldtype:"Check", in_list_view:1}, {fieldname:"label_override", label:__("Label Override"), fieldtype:"Data", in_list_view:1}
 		]}], primary_action_label: __("Save Configuration"), primary_action(values) { doc.fields = values.fields; frappe.call({method:"ai_form_builder.api.project_configuration.save_form_configuration", args:{configuration:doc}, callback: () => { dialog.hide(); load(); }}); }});
-		dialog.set_secondary_action_label(__("Select All")); dialog.set_secondary_action(() => { dialog.fields_dict.fields.grid.get_data().forEach(row => row.enabled = 1); dialog.fields_dict.fields.grid.refresh(); }); dialog.show();
+		dialog.add_custom_action(__("Select All"), () => { dialog.fields_dict.fields.grid.get_data().forEach(row => row.enabled = 1); dialog.fields_dict.fields.grid.refresh(); });
+		dialog.add_custom_action(__("Reset to Master"), () => {
+			if (!doc.name) { frappe.show_alert({message: __("Save this configuration before resetting it."), indicator: "orange"}); return; }
+			frappe.confirm(__("Reset every field setting to the master form? This does not change saved document values."), () => frappe.call({method: "ai_form_builder.api.project_configuration.reset_configuration_to_master", args: {configuration_name: doc.name}, callback: r => { doc.fields = r.message.fields; dialog.fields_dict.fields.grid.df.data = doc.fields; dialog.fields_dict.fields.grid.refresh(); }}));
+		});
+		dialog.show();
 	}
 };
