@@ -1,10 +1,11 @@
 {
  "actions": [], "allow_rename": 1, "autoname": "field:template_code", "creation": "2026-09-30 00:00:00.000000", "doctype": "DocType",
- "engine": "InnoDB", "field_order": ["template_title", "template_code", "source_pdf", "status", "document_category", "form_group", "generated_doctype", "target_doctype", "template_version", "description", "project_configuration_section", "enable_project_configuration", "reference_doctype", "reference_fieldname", "analysis_section", "number_of_pages", "ai_provider", "ai_model", "analysis_json", "analysis_error", "analysis_started_at", "analysis_completed_at", "analyzed_by", "rendering_section", "coordinate_system", "default_font", "default_font_size", "minimum_font_size", "default_date_format", "enable_header_exclusion", "header_height", "enable_footer_exclusion", "footer_height", "auto_attach_generated_pdf", "sections", "fields"],
+ "engine": "InnoDB", "field_order": ["template_title", "template_code", "source_type", "source_pdf", "status", "document_category", "form_group", "generated_doctype", "target_doctype", "template_version", "description", "project_configuration_section", "enable_project_configuration", "reference_doctype", "reference_fieldname", "analysis_section", "number_of_pages", "ai_provider", "ai_model", "analysis_json", "analysis_error", "analysis_started_at", "analysis_completed_at", "analyzed_by", "rendering_section", "coordinate_system", "default_font", "default_font_size", "minimum_font_size", "default_date_format", "enable_header_exclusion", "header_height", "enable_footer_exclusion", "footer_height", "auto_attach_generated_pdf", "sections", "fields"],
  "fields": [
   {"fieldname":"template_title","fieldtype":"Data","in_list_view":1,"label":"Template Title","reqd":1},
   {"fieldname":"template_code","fieldtype":"Data","in_list_view":1,"label":"Template Code","reqd":1,"unique":1},
-  {"fieldname":"source_pdf","fieldtype":"Attach","label":"Source PDF","reqd":1},
+  {"default":"AI PDF","fieldname":"source_type","fieldtype":"Select","in_list_view":1,"label":"Source Type","options":"AI PDF\nManual\nExisting DocType","reqd":1},
+  {"fieldname":"source_pdf","fieldtype":"Attach","label":"Source PDF","mandatory_depends_on":"eval:doc.source_type=='AI PDF'"},
   {"default":"Draft","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Draft\nUploaded\nAnalyzing\nAnalysis Failed\nReview Required\nApproved\nGenerated\nDisabled","read_only":1},
   {"default":"Form","fieldname":"document_category","fieldtype":"Select","label":"Document Category","options":"Form\nChecklist\nRegister\nReport\nOther"},
   {"fieldname":"form_group","fieldtype":"Link","label":"Form Group","options":"AI Form Group"},

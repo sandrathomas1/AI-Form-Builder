@@ -10,6 +10,10 @@ doctype_js = {
 	"AI Project Form Configuration": "public/js/ai_project_form_configuration.js",
 }
 
+doctype_list_js = {
+	"AI Form Template": "public/js/ai_form_template_list.js",
+}
+
 app_include_js = "/assets/ai_form_builder/js/project_form_runtime.js"
 
 doc_events = {
