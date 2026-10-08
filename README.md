@@ -51,6 +51,13 @@ DocType Layout in Frappe v15 only holds field order and labels, so the per-proje
 
 `ai_form_builder/integrations/docuflow.py` is the only Docuflow-aware module and is inert when Docuflow is not installed. It reads Docuflow's `DCMS Project` and the user's active project through Docuflow's public helper; it never writes Docuflow data or changes Docuflow code. Docuflow's sidebars and registers are fixed in its source with no extension hook, so dynamic forms are offered alongside them from **Project Forms** (Desk), while Docuflow's own forms keep working unchanged. Give Docuflow roles access to a dynamic form's DocType with Frappe's Role Permission Manager.
 
+**Forms inside Docuflow (`/d`).** On every Docuflow page that belongs to an area with *Show Form Library in External App* ticked, a **⟨Area⟩ forms** button opens a panel. The match uses the area's *External Route Prefixes*, e.g. `/d/quality`, and the longest prefix wins. Project pages show the panel too. In the panel:
+
+- Users see the forms enabled for the project chosen in Docuflow's top bar, with **New** and **Records**.
+- Managers also tick **Use on project**, open **Edit fields** (Frappe Form Builder), run **Sync & publish**, open **Project fields**, and use **Create new form**: manual no-code, AI from PDF, or an existing DocType.
+
+To offer forms in another Docuflow area later, open its AI Form Area, tick the box and enter its route (e.g. `/d/project-controls`). No code is needed. The panel is added by this app's `after_request` hook; Docuflow's files are unchanged.
+
 Register/report pagination, child-table PDF placement, OCR fallback, and drag/resize mapping are planned extensions.
 
 ### Contributing

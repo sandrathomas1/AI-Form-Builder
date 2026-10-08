@@ -12,6 +12,8 @@
   "integration_section",
   "external_app",
   "external_reference",
+  "show_in_external_app",
+  "external_route_prefixes",
   "description"
  ],
  "fields": [
@@ -64,10 +66,24 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "default": "0",
+   "description": "Offer this area's forms (and, for managers, Create New Form) inside the external app on the routes below.",
+   "fieldname": "show_in_external_app",
+   "fieldtype": "Check",
+   "label": "Show Form Library in External App"
+  },
+  {
+   "depends_on": "eval:doc.show_in_external_app",
+   "description": "One path per line, e.g. /d/quality. The longest matching prefix decides the area.",
+   "fieldname": "external_route_prefixes",
+   "fieldtype": "Small Text",
+   "label": "External Route Prefixes"
   }
  ],
  "links": [],
- "modified": "2026-10-08 12:00:00.000000",
+ "modified": "2026-10-08 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "AI Form Builder",
  "name": "AI Form Area",

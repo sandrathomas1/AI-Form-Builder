@@ -5,6 +5,7 @@ from frappe import _
 from frappe.utils import cint
 
 from ai_form_builder.services import form_registry
+from ai_form_builder.services.doctype_generator import DocTypeGenerator
 from ai_form_builder.services.project_form_service import install_runtime_for_template
 from ai_form_builder.utils.validation import sanitize_fieldname
 
@@ -68,9 +69,16 @@ def create_manual_form(
 	if enable_project_configuration and not reference_fieldname:
 		reference_fieldname = sanitize_fieldname(reference_doctype)
 
+	# Layout the admin starts from in Form Builder: the project link first,
+	# then the optional attachment; the hidden runtime fields sit on their own
+	# trailing "System" tab so they are out of the way while designing.
 	fields = []
+	if enable_project_configuration:
+		fields.append(form_registry.reference_field(reference_doctype, reference_fieldname))
 	if cint(allow_attachments):
 		fields.append({"label": _("Attachment"), "fieldname": "attachment", "fieldtype": "Attach"})
+	fields.append({"label": _("System"), "fieldname": "ai_form_system_tab", "fieldtype": "Tab Break"})
+	fields.extend(DocTypeGenerator()._runtime_fields(template_code))
 	doctype = frappe.get_doc(
 		{
 			"doctype": "DocType",

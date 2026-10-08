@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
-from ai_form_builder.services.form_registry import LOCKED_STATUSES
+from ai_form_builder.services.form_registry import LOCKED_STATUSES, default_reference
 from ai_form_builder.services.template_service import analyze_template as run_analysis
 from ai_form_builder.utils.validation import validate_mapping
 
@@ -12,11 +12,22 @@ def _manager():
 
 
 @frappe.whitelist()
-def create_template_from_upload(template_title, template_code, source_pdf, document_category="Form"):
+def create_template_from_upload(
+	template_title,
+	template_code,
+	source_pdf,
+	document_category="Form",
+	target_area=None,
+	form_group=None,
+	enable_project_configuration=0,
+):
 	"""Website frontend entrypoint; file upload remains Frappe's standard endpoint."""
 	_manager()
 	if not source_pdf or not source_pdf.lower().endswith(".pdf"):
 		frappe.throw(_("Upload a PDF file before creating the template."))
+	reference_doctype = reference_fieldname = None
+	if cint(enable_project_configuration):
+		reference_doctype, reference_fieldname = default_reference()
 	doc = frappe.get_doc(
 		{
 			"doctype": "AI Form Template",
@@ -24,6 +35,11 @@ def create_template_from_upload(template_title, template_code, source_pdf, docum
 			"template_code": template_code,
 			"source_pdf": source_pdf,
 			"document_category": document_category,
+			"target_area": target_area,
+			"form_group": form_group,
+			"enable_project_configuration": 1 if reference_doctype else 0,
+			"reference_doctype": reference_doctype,
+			"reference_fieldname": reference_fieldname,
 		}
 	).insert()
 	return {"name": doc.name, "status": doc.status}

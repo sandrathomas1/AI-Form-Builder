@@ -30,6 +30,10 @@ fixtures = [
 
 after_install = "ai_form_builder.install.after_install"
 
+# Optional Docuflow integration: adds the Form Library panel to Docuflow's /d
+# page from this app (no Docuflow file changes). A no-op without Docuflow.
+after_request = ["ai_form_builder.integrations.docuflow.inject_bridge"]
+
 # Apps
 # ------------------
 

@@ -740,3 +740,141 @@ class TestDocuflowAdapter(FormLibraryTestCase):
 		finally:
 			settings.default_reference_doctype = None
 			settings.save()
+
+
+class TestDocuflowPanel(FormLibraryTestCase):
+	"""The Form Library panel added to Docuflow's /d app from this app."""
+
+	def _response(self, path, html="<html><body><div id=app></div></body></html>"):
+		from werkzeug.test import EnvironBuilder
+		from werkzeug.wrappers import Request, Response
+
+		request = Request(EnvironBuilder(path=path, method="GET").get_environ())
+		return request, Response(html, mimetype="text/html")
+
+	def test_bridge_is_added_only_to_docuflow_pages_for_logged_in_users(self):
+		with patch.object(docuflow, "is_installed", return_value=True):
+			request, response = self._response("/d/quality")
+			docuflow.inject_bridge(response=response, request=request)
+			html = response.get_data(as_text=True)
+			self.assertIn(docuflow.BRIDGE_JS, html)
+			self.assertEqual(html.count(docuflow.BRIDGE_JS), 1)
+			docuflow.inject_bridge(response=response, request=request)
+			self.assertEqual(response.get_data(as_text=True).count(docuflow.BRIDGE_JS), 1)
+			for path in ("/app/todo", "/dashboard", "/data"):
+				request, response = self._response(path)
+				docuflow.inject_bridge(response=response, request=request)
+				self.assertNotIn(docuflow.BRIDGE_JS, response.get_data(as_text=True), path)
+			frappe.set_user("Guest")
+			request, response = self._response("/d")
+			docuflow.inject_bridge(response=response, request=request)
+			self.assertNotIn(docuflow.BRIDGE_JS, response.get_data(as_text=True))
+		frappe.set_user("Administrator")
+		with patch.object(docuflow, "is_installed", return_value=False):
+			request, response = self._response("/d/hse")
+			docuflow.inject_bridge(response=response, request=request)
+			self.assertNotIn(docuflow.BRIDGE_JS, response.get_data(as_text=True))
+
+	def test_areas_switch_the_panel_on_by_configuration(self):
+		for name in ("Quality", "HSE"):
+			area = frappe.get_doc("AI Form Area", name)
+			area.update(
+				{
+					"external_app": "docuflow",
+					"show_in_external_app": 1,
+					"external_route_prefixes": f"/d/{name.lower()}",
+				}
+			)
+			area.save()
+		frappe.get_doc(
+			{
+				"doctype": "AI Form Area",
+				"area_name": "AFB Test Engineering",
+				"external_app": "docuflow",
+				"show_in_external_app": 1,
+				"external_route_prefixes": "/d/project-controls\n/d/quality/submittals/",
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "AI Form Group",
+				"group_name": "AFB Test Civil",
+				"target_area": "AFB Test Engineering",
+			}
+		).insert()
+		with (
+			patch.object(docuflow, "get_project_doctype", return_value=PROJECT),
+			patch.object(docuflow, "get_active_project", return_value="AFB-A"),
+		):
+			config = docuflow.get_bridge_config()
+		areas = {area["name"]: area["prefixes"] for area in config["areas"]}
+		self.assertEqual(areas["Quality"], ["/d/quality"])
+		self.assertEqual(areas["AFB Test Engineering"], ["/d/project-controls", "/d/quality/submittals"])
+		self.assertTrue(config["can_manage"])
+		self.assertEqual(config["active_project"], "AFB-A")
+		self.assertIn(
+			("AFB Test Civil", "AFB Test Engineering"),
+			[(g["name"], g["target_area"]) for g in config["groups"]],
+		)
+		frappe.db.set_value("AI Form Area", "AFB Test Engineering", "show_in_external_app", 0)
+		with patch.object(docuflow, "get_project_doctype", return_value=PROJECT):
+			self.assertNotIn(
+				"AFB Test Engineering", [area["name"] for area in docuflow.get_bridge_config()["areas"]]
+			)
+
+	def test_area_forms_for_managers_and_users(self):
+		frappe.db.set_value(
+			"AI Form Area",
+			"HSE",
+			{"external_app": "docuflow", "show_in_external_app": 1, "external_route_prefixes": "/d/hse"},
+		)
+		self.configure("AFB-A", {"permit_number": {"enabled": 0}, "contractor": {"enabled": 0}})
+		with patch.object(docuflow, "get_project_doctype", return_value=PROJECT):
+			managed = docuflow.get_area_forms("HSE", "AFB-A")["forms"]
+			safety = next(form for form in managed if form["doctype"] == SAFETY)
+			self.assertTrue(safety["enabled"])
+			self.assertEqual(safety["edit_url"], f"/app/doctype/{SAFETY.replace(' ', '%20')}")
+			self.assertEqual(safety["new_url"], "/app/afb-test-safety-inspection/new?project=AFB-A")
+			self.assertIn("reference_name=AFB-A", safety["configure_url"])
+			other = docuflow.get_area_forms("HSE", "AFB-B")["forms"]
+			self.assertFalse(next(form for form in other if form["doctype"] == SAFETY)["enabled"])
+			self.assertRaises(frappe.ValidationError, docuflow.get_area_forms, "Not An Area", "AFB-A")
+
+			user = frappe.get_doc(
+				{"doctype": "User", "email": TEST_USER, "first_name": "AFB", "send_welcome_email": 0}
+			).insert()
+			user.add_roles("AI Form Builder User")
+			frappe.set_user(TEST_USER)
+			self.assertFalse(docuflow.get_bridge_config()["can_manage"])
+			forms = docuflow.get_area_forms("HSE", "AFB-A")["forms"]
+			self.assertEqual([form["doctype"] for form in forms], [SAFETY])
+			self.assertNotIn("edit_url", forms[0])
+			self.assertEqual(docuflow.get_area_forms("HSE", "AFB-B")["forms"], [])
+
+	def test_ai_upload_from_the_panel_files_the_form_under_its_area(self):
+		settings = frappe.get_single("AI Form Builder Settings")
+		settings.default_reference_doctype = PROJECT
+		settings.save()
+		try:
+			created = template_api.create_template_from_upload(
+				"AFB Test AI Panel",
+				"AFB-T-AIP",
+				_pdf_url("afb-panel"),
+				target_area="Quality",
+				form_group="QC",
+				enable_project_configuration=1,
+			)
+			template = frappe.get_doc("AI Form Template", created["name"])
+			self.assertEqual(
+				(template.target_area, template.form_group, template.status), ("Quality", "QC", "Uploaded")
+			)
+			self.assertEqual((template.reference_doctype, template.reference_fieldname), (PROJECT, "project"))
+		finally:
+			settings.default_reference_doctype = None
+			settings.save()
+
+	def test_manual_form_starts_with_project_first_and_system_tab_last(self):
+		fields = [f.fieldname for f in frappe.get_meta(SAFETY).fields]
+		self.assertEqual(fields[:2], ["project", "attachment"])
+		self.assertLess(fields.index("ai_form_system_tab"), fields.index("ai_form_template"))
+		self.assertEqual(frappe.get_meta(SAFETY).get_field("project").label, "Project")

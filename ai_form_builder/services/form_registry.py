@@ -61,6 +61,24 @@ def default_reference():
 	return doctype, (fieldname if doctype else None)
 
 
+def edit_url(doctype):
+	"""Desk URL of the native editor, for links from outside Desk."""
+	from urllib.parse import quote, urlencode
+
+	route = edit_route(doctype)
+	if route["route"][1] == "DocType":
+		return f"/app/doctype/{quote(doctype)}"
+	return "/app/customize-form?" + urlencode(route["route_options"])
+
+
+def desk_url(doctype, view="new", values=None):
+	"""Desk URL for a new record or the list, with values pre-filled from the query string."""
+	from urllib.parse import quote, urlencode
+
+	url = "/app/" + quote(doctype.lower().replace(" ", "-")) + ("/new" if view == "new" else "")
+	return url + ("?" + urlencode(values) if values else "")
+
+
 def edit_route(doctype):
 	"""Native Frappe editor for the DocType: Form Builder for custom, Customize Form for standard."""
 	if frappe.db.get_value("DocType", doctype, "custom"):
@@ -75,18 +93,20 @@ def ensure_reference_field(doctype_name, reference_doctype, reference_fieldname)
 	doctype = frappe.get_doc("DocType", doctype_name)
 	if any(field.fieldname == reference_fieldname for field in doctype.fields):
 		return
-	doctype.append(
-		"fields",
-		{
-			"label": _(reference_doctype),
-			"fieldname": reference_fieldname,
-			"fieldtype": "Link",
-			"options": reference_doctype,
-			"in_list_view": 1,
-			"in_standard_filter": 1,
-		},
-	)
+	doctype.append("fields", reference_field(reference_doctype, reference_fieldname))
 	doctype.save()
+
+
+def reference_field(reference_doctype, reference_fieldname):
+	"""The context Link, labelled after its fieldname (e.g. "Project")."""
+	return {
+		"label": _(frappe.unscrub(reference_fieldname)),
+		"fieldname": reference_fieldname,
+		"fieldtype": "Link",
+		"options": reference_doctype,
+		"in_list_view": 1,
+		"in_standard_filter": 1,
+	}
 
 
 def assert_unregistered(doctype):
@@ -292,7 +312,7 @@ def _group_path(group_name, groups):
 	return path
 
 
-def _library_rows(reference_doctype, area=None):
+def library_rows(reference_doctype, area=None):
 	templates = frappe.get_all(
 		TEMPLATE,
 		filters={
@@ -311,6 +331,8 @@ def _library_rows(reference_doctype, area=None):
 			"target_area",
 			"reference_fieldname",
 			"source_pdf",
+			"status",
+			"source_type",
 		],
 	)
 	groups = {
@@ -351,7 +373,7 @@ def _library_rows(reference_doctype, area=None):
 
 def get_setup_forms(reference_doctype, reference_name):
 	"""Every project-configurable form with this project's enablement and profile."""
-	rows = _library_rows(reference_doctype)
+	rows = library_rows(reference_doctype)
 	configurations = {
 		row.form_template: row
 		for row in frappe.get_all(
@@ -384,7 +406,7 @@ def get_enabled_forms(reference_doctype, reference_name, area=None):
 		)
 	)
 	forms = []
-	for row in _library_rows(reference_doctype, area=area):
+	for row in library_rows(reference_doctype, area=area):
 		if row.name not in enabled or not row.generated_doctype:
 			continue
 		if not frappe.has_permission(row.generated_doctype, "read"):
