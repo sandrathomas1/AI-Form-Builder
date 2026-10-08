@@ -2,6 +2,7 @@ import re
 
 import frappe
 from frappe import _
+from frappe.model import data_fieldtypes, table_fields
 
 ALLOWED_FIELD_TYPES = {
 	"Data",
@@ -27,6 +28,9 @@ ALLOWED_FIELD_TYPES = {
 	"Section Break",
 	"Column Break",
 }
+# Fields synced from a Frappe DocType may use any value type Frappe itself
+# allows; the narrower set above still governs what AI analysis may suggest.
+SYNCED_FIELD_TYPES = ALLOWED_FIELD_TYPES | set(data_fieldtypes) | set(table_fields)
 FIELDNAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,139}$")
 
 
@@ -43,7 +47,7 @@ def sanitize_fieldname(value: str) -> str:
 
 def validate_mapping(field, page_count: int | None = None):
 	field.fieldname = sanitize_fieldname(field.fieldname)
-	if field.final_fieldtype and field.final_fieldtype not in ALLOWED_FIELD_TYPES:
+	if field.final_fieldtype and field.final_fieldtype not in SYNCED_FIELD_TYPES:
 		frappe.throw(_("Unsupported Frappe field type: {0}").format(field.final_fieldtype))
 	if field.suggested_fieldtype and field.suggested_fieldtype not in ALLOWED_FIELD_TYPES:
 		frappe.throw(_("Unsupported suggested field type: {0}").format(field.suggested_fieldtype))

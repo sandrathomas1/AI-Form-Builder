@@ -2,28 +2,34 @@
 
 import frappe
 from frappe import _
+from frappe.utils import cint
 
+from ai_form_builder.services import form_registry
 from ai_form_builder.services.project_form_service import install_runtime_for_template
 from ai_form_builder.utils.validation import sanitize_fieldname
 
 TEMPLATE_DOCTYPE = "AI Form Template"
-SYSTEM_FIELDS = {
-	"name",
-	"owner",
-	"creation",
-	"modified",
-	"modified_by",
-	"docstatus",
-	"idx",
-	"ai_form_template",
-	"ai_form_project_configuration",
-	"ai_form_configuration_snapshot",
-}
-LAYOUT_FIELDS = {"Section Break", "Column Break", "Tab Break", "HTML", "Fold", "Heading"}
 
 
 def _manager():
 	frappe.only_for(["AI Form Builder Manager", "System Manager"])
+
+
+DOCTYPE_PERMISSIONS = [
+	{
+		"role": "AI Form Builder Manager",
+		"read": 1,
+		"write": 1,
+		"create": 1,
+		"delete": 1,
+		"print": 1,
+		"email": 1,
+		"report": 1,
+		"export": 1,
+		"share": 1,
+	},
+	{"role": "AI Form Builder User", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "email": 1},
+]
 
 
 @frappe.whitelist()
@@ -34,6 +40,10 @@ def create_manual_form(
 	enable_project_configuration=0,
 	reference_doctype=None,
 	reference_fieldname=None,
+	target_area=None,
+	description=None,
+	is_submittable=0,
+	allow_attachments=0,
 ):
 	"""Create a blank Custom DocType and register it in the existing template flow.
 
@@ -49,29 +59,33 @@ def create_manual_form(
 		frappe.throw(_("Form title is required."))
 	if frappe.db.exists("DocType", doctype_name):
 		frappe.throw(_("DocType {0} already exists.").format(doctype_name))
+	enable_project_configuration = cint(enable_project_configuration)
+	if enable_project_configuration and not reference_doctype:
+		reference_doctype, default_fieldname = form_registry.default_reference()
+		reference_fieldname = reference_fieldname or default_fieldname
 	if enable_project_configuration and not reference_doctype:
 		frappe.throw(_("Reference DocType is required when Project Configuration is enabled."))
+	if enable_project_configuration and not reference_fieldname:
+		reference_fieldname = sanitize_fieldname(reference_doctype)
 
+	fields = []
+	if cint(allow_attachments):
+		fields.append({"label": _("Attachment"), "fieldname": "attachment", "fieldtype": "Attach"})
 	doctype = frappe.get_doc(
 		{
 			"doctype": "DocType",
 			"name": doctype_name,
 			"module": "AI Form Builder",
 			"custom": 1,
-			"is_submittable": 0,
-			"permissions": [
-				{
-					"role": "AI Form Builder User",
-					"read": 1,
-					"write": 1,
-					"create": 1,
-					"delete": 1,
-					"print": 1,
-					"email": 1,
-				}
-			],
+			"is_submittable": cint(is_submittable),
+			"description": description,
+			"track_changes": 1,
+			"fields": fields,
+			"permissions": DOCTYPE_PERMISSIONS,
 		}
 	).insert()
+	if enable_project_configuration:
+		form_registry.ensure_reference_field(doctype.name, reference_doctype, reference_fieldname)
 	template = frappe.get_doc(
 		{
 			"doctype": TEMPLATE_DOCTYPE,
@@ -79,47 +93,29 @@ def create_manual_form(
 			"template_code": template_code,
 			"source_type": "Manual",
 			"status": "Generated",
+			"target_area": target_area,
 			"form_group": form_group,
+			"description": description,
 			"generated_doctype": doctype.name,
 			"target_doctype": doctype.name,
-			"enable_project_configuration": int(enable_project_configuration or 0),
+			"enable_project_configuration": enable_project_configuration,
 			"reference_doctype": reference_doctype,
 			"reference_fieldname": reference_fieldname,
 		}
 	).insert()
 	install_runtime_for_template(template)
-	return {"template": template.name, "doctype": doctype.name}
+	form_registry.sync_fields(template)
+	return {"template": template.name, "doctype": doctype.name, **form_registry.edit_route(doctype.name)}
 
 
 @frappe.whitelist()
 def sync_manual_fields(template_name):
-	"""Import new Frappe-configured fields without removing mapping metadata."""
+	"""Import Frappe-configured fields without removing mapping metadata.
+
+	Kept for existing callers; works for every source type.
+	"""
 	_manager()
 	template = frappe.get_doc(TEMPLATE_DOCTYPE, template_name)
 	template.check_permission("write")
-	if template.source_type != "Manual":
-		frappe.throw(_("Only manual templates can be synced this way."))
-	meta = frappe.get_meta(template.generated_doctype)
-	existing = {row.fieldname: row for row in template.fields}
-	for field in meta.fields:
-		if field.fieldname in SYSTEM_FIELDS or field.fieldtype in LAYOUT_FIELDS:
-			continue
-		row = existing.get(field.fieldname)
-		if not row:
-			row = template.append("fields", {"fieldname": sanitize_fieldname(field.fieldname)})
-		row.label = field.label or field.fieldname
-		row.suggested_fieldtype = field.fieldtype
-		row.final_fieldtype = field.fieldtype
-		row.options = field.options or ""
-		row.mandatory = field.reqd
-		row.read_only = field.read_only
-		row.hidden = field.hidden
-		row.link_target = field.options if field.fieldtype == "Link" else ""
-		# Manual forms have no PDF coordinates. These inert values satisfy the
-		# shared mapping validator and are never rendered because printable=0.
-		row.page_number = row.page_number or 1
-		row.width = row.width or 1
-		row.height = row.height or 1
-		row.is_printable = 0
-	template.save()
-	return {"template": template.name, "fields": len(template.fields)}
+	summary = form_registry.sync_fields(template)
+	return {"template": template.name, "fields": len(template.fields), **summary}

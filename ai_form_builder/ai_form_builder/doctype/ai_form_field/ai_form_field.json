@@ -1,1 +1,241 @@
-{"actions":[],"doctype":"DocType","editable_grid":1,"engine":"InnoDB","field_order":["section_name","label","fieldname","suggested_fieldtype","final_fieldtype","options","mandatory","read_only","hidden","default_value","description","page_number","x","y","width","height","confidence","detected_element_type","is_printable","is_signature","is_option_group","is_table","is_register_column","is_system_field","ignore_field","link_target","existing_field_mapping","font_size","font_family","horizontal_alignment","vertical_alignment","overflow_strategy","option_value"],"fields":[{"fieldname":"section_name","fieldtype":"Data","in_list_view":1,"label":"Section"},{"fieldname":"label","fieldtype":"Data","in_list_view":1,"label":"Label","reqd":1},{"fieldname":"fieldname","fieldtype":"Data","in_list_view":1,"label":"Fieldname","reqd":1},{"fieldname":"suggested_fieldtype","fieldtype":"Data","label":"Suggested Field Type"},{"fieldname":"final_fieldtype","fieldtype":"Select","label":"Final Field Type","options":"Data\nSmall Text\nText\nLong Text\nText Editor\nDate\nDatetime\nTime\nInt\nFloat\nCurrency\nPercent\nSelect\nCheck\nLink\nDynamic Link\nSignature\nAttach\nAttach Image\nTable"},{"fieldname":"options","fieldtype":"Small Text","label":"Options"},{"fieldname":"mandatory","fieldtype":"Check","label":"Mandatory"},{"fieldname":"read_only","fieldtype":"Check","label":"Read Only"},{"fieldname":"hidden","fieldtype":"Check","label":"Hidden"},{"fieldname":"default_value","fieldtype":"Data","label":"Default Value"},{"fieldname":"description","fieldtype":"Small Text","label":"Description"},{"fieldname":"page_number","fieldtype":"Int","label":"Page Number","reqd":1},{"fieldname":"x","fieldtype":"Float","label":"X","reqd":1},{"fieldname":"y","fieldtype":"Float","label":"Y","reqd":1},{"fieldname":"width","fieldtype":"Float","label":"Width","reqd":1},{"fieldname":"height","fieldtype":"Float","label":"Height","reqd":1},{"fieldname":"confidence","fieldtype":"Percent","label":"Confidence"},{"fieldname":"detected_element_type","fieldtype":"Data","label":"Detected Element Type"},{"default":"1","fieldname":"is_printable","fieldtype":"Check","label":"Printable"},{"fieldname":"is_signature","fieldtype":"Check","label":"Signature"},{"fieldname":"is_option_group","fieldtype":"Check","label":"Option Group"},{"fieldname":"is_table","fieldtype":"Check","label":"Table"},{"fieldname":"is_register_column","fieldtype":"Check","label":"Register Column"},{"fieldname":"is_system_field","fieldtype":"Check","label":"System Field"},{"fieldname":"ignore_field","fieldtype":"Check","label":"Ignore Field"},{"fieldname":"link_target","fieldtype":"Link","label":"Link Target","options":"DocType"},{"fieldname":"existing_field_mapping","fieldtype":"Data","label":"Existing Field Mapping"},{"fieldname":"font_size","fieldtype":"Float","label":"Font Size"},{"fieldname":"font_family","fieldtype":"Data","label":"Font Family"},{"default":"Left","fieldname":"horizontal_alignment","fieldtype":"Select","label":"Horizontal Alignment","options":"Left\nCenter\nRight"},{"default":"Middle","fieldname":"vertical_alignment","fieldtype":"Select","label":"Vertical Alignment","options":"Top\nMiddle\nBottom"},{"default":"Wrap Then Shrink","fieldname":"overflow_strategy","fieldtype":"Select","label":"Overflow Strategy","options":"Wrap\nShrink\nWrap Then Shrink\nTruncate\nError"},{"fieldname":"option_value","fieldtype":"Data","label":"Option Value"}],"istable":1,"module":"AI Form Builder","name":"AI Form Field"}
+{
+ "actions": [],
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_name",
+  "label",
+  "fieldname",
+  "suggested_fieldtype",
+  "final_fieldtype",
+  "options",
+  "mandatory",
+  "read_only",
+  "hidden",
+  "default_value",
+  "description",
+  "page_number",
+  "x",
+  "y",
+  "width",
+  "height",
+  "confidence",
+  "detected_element_type",
+  "is_printable",
+  "is_signature",
+  "is_option_group",
+  "is_table",
+  "is_register_column",
+  "is_system_field",
+  "ignore_field",
+  "link_target",
+  "existing_field_mapping",
+  "mapping_status",
+  "font_size",
+  "font_family",
+  "horizontal_alignment",
+  "vertical_alignment",
+  "overflow_strategy",
+  "option_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Section"
+  },
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Label",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fieldname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Fieldname",
+   "reqd": 1
+  },
+  {
+   "fieldname": "suggested_fieldtype",
+   "fieldtype": "Data",
+   "label": "Suggested Field Type"
+  },
+  {
+   "fieldname": "final_fieldtype",
+   "fieldtype": "Select",
+   "label": "Final Field Type",
+   "options": "Data\nSmall Text\nText\nLong Text\nText Editor\nDate\nDatetime\nTime\nInt\nFloat\nCurrency\nPercent\nSelect\nCheck\nLink\nDynamic Link\nSignature\nAttach\nAttach Image\nTable\nTable MultiSelect\nLong Int\nPhone\nRating\nDuration\nColor\nCode\nMarkdown Editor\nHTML Editor\nRead Only\nAutocomplete\nGeolocation\nJSON\nBarcode\nIcon\nPassword"
+  },
+  {
+   "fieldname": "options",
+   "fieldtype": "Small Text",
+   "label": "Options"
+  },
+  {
+   "fieldname": "mandatory",
+   "fieldtype": "Check",
+   "label": "Mandatory"
+  },
+  {
+   "fieldname": "read_only",
+   "fieldtype": "Check",
+   "label": "Read Only"
+  },
+  {
+   "fieldname": "hidden",
+   "fieldtype": "Check",
+   "label": "Hidden"
+  },
+  {
+   "fieldname": "default_value",
+   "fieldtype": "Data",
+   "label": "Default Value"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "page_number",
+   "fieldtype": "Int",
+   "label": "Page Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "x",
+   "fieldtype": "Float",
+   "label": "X",
+   "reqd": 1
+  },
+  {
+   "fieldname": "y",
+   "fieldtype": "Float",
+   "label": "Y",
+   "reqd": 1
+  },
+  {
+   "fieldname": "width",
+   "fieldtype": "Float",
+   "label": "Width",
+   "reqd": 1
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Float",
+   "label": "Height",
+   "reqd": 1
+  },
+  {
+   "fieldname": "confidence",
+   "fieldtype": "Percent",
+   "label": "Confidence"
+  },
+  {
+   "fieldname": "detected_element_type",
+   "fieldtype": "Data",
+   "label": "Detected Element Type"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_printable",
+   "fieldtype": "Check",
+   "label": "Printable"
+  },
+  {
+   "fieldname": "is_signature",
+   "fieldtype": "Check",
+   "label": "Signature"
+  },
+  {
+   "fieldname": "is_option_group",
+   "fieldtype": "Check",
+   "label": "Option Group"
+  },
+  {
+   "fieldname": "is_table",
+   "fieldtype": "Check",
+   "label": "Table"
+  },
+  {
+   "fieldname": "is_register_column",
+   "fieldtype": "Check",
+   "label": "Register Column"
+  },
+  {
+   "fieldname": "is_system_field",
+   "fieldtype": "Check",
+   "label": "System Field"
+  },
+  {
+   "fieldname": "ignore_field",
+   "fieldtype": "Check",
+   "label": "Ignore Field"
+  },
+  {
+   "fieldname": "link_target",
+   "fieldtype": "Link",
+   "label": "Link Target",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "existing_field_mapping",
+   "fieldtype": "Data",
+   "label": "Existing Field Mapping"
+  },
+  {
+   "fieldname": "font_size",
+   "fieldtype": "Float",
+   "label": "Font Size"
+  },
+  {
+   "fieldname": "font_family",
+   "fieldtype": "Data",
+   "label": "Font Family"
+  },
+  {
+   "default": "Left",
+   "fieldname": "horizontal_alignment",
+   "fieldtype": "Select",
+   "label": "Horizontal Alignment",
+   "options": "Left\nCenter\nRight"
+  },
+  {
+   "default": "Middle",
+   "fieldname": "vertical_alignment",
+   "fieldtype": "Select",
+   "label": "Vertical Alignment",
+   "options": "Top\nMiddle\nBottom"
+  },
+  {
+   "default": "Wrap Then Shrink",
+   "fieldname": "overflow_strategy",
+   "fieldtype": "Select",
+   "label": "Overflow Strategy",
+   "options": "Wrap\nShrink\nWrap Then Shrink\nTruncate\nError"
+  },
+  {
+   "fieldname": "option_value",
+   "fieldtype": "Data",
+   "label": "Option Value"
+  },
+  {
+   "default": "Active",
+   "fieldname": "mapping_status",
+   "fieldtype": "Select",
+   "in_list_view": 0,
+   "label": "Mapping Status",
+   "options": "Active\nOrphaned",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-10-08 12:00:00.000000",
+ "module": "AI Form Builder",
+ "name": "AI Form Field"
+}

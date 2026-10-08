@@ -1,44 +1,322 @@
 {
- "actions": [], "allow_rename": 1, "autoname": "field:template_code", "creation": "2026-09-30 00:00:00.000000", "doctype": "DocType",
- "engine": "InnoDB", "field_order": ["template_title", "template_code", "source_type", "source_pdf", "status", "document_category", "form_group", "generated_doctype", "target_doctype", "template_version", "description", "project_configuration_section", "enable_project_configuration", "reference_doctype", "reference_fieldname", "analysis_section", "number_of_pages", "ai_provider", "ai_model", "analysis_json", "analysis_error", "analysis_started_at", "analysis_completed_at", "analyzed_by", "rendering_section", "coordinate_system", "default_font", "default_font_size", "minimum_font_size", "default_date_format", "enable_header_exclusion", "header_height", "enable_footer_exclusion", "footer_height", "auto_attach_generated_pdf", "sections", "fields"],
- "fields": [
-  {"fieldname":"template_title","fieldtype":"Data","in_list_view":1,"label":"Template Title","reqd":1},
-  {"fieldname":"template_code","fieldtype":"Data","in_list_view":1,"label":"Template Code","reqd":1,"unique":1},
-  {"default":"AI PDF","fieldname":"source_type","fieldtype":"Select","in_list_view":1,"label":"Source Type","options":"AI PDF\nManual\nExisting DocType","reqd":1},
-  {"fieldname":"source_pdf","fieldtype":"Attach","label":"Source PDF","mandatory_depends_on":"eval:doc.source_type=='AI PDF'"},
-  {"default":"Draft","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Draft\nUploaded\nAnalyzing\nAnalysis Failed\nReview Required\nApproved\nGenerated\nDisabled","read_only":1},
-  {"default":"Form","fieldname":"document_category","fieldtype":"Select","label":"Document Category","options":"Form\nChecklist\nRegister\nReport\nOther"},
-  {"fieldname":"form_group","fieldtype":"Link","label":"Form Group","options":"AI Form Group"},
-  {"fieldname":"generated_doctype","fieldtype":"Link","label":"Generated DocType","options":"DocType","read_only":1},
-  {"fieldname":"target_doctype","fieldtype":"Link","label":"Map to Existing DocType","options":"DocType"},
-  {"default":"1","fieldname":"template_version","fieldtype":"Data","label":"Template Version"},
-  {"fieldname":"description","fieldtype":"Small Text","label":"Description"},
-  {"fieldname":"project_configuration_section","fieldtype":"Section Break","label":"Project Configuration"},
-  {"default":"0","fieldname":"enable_project_configuration","fieldtype":"Check","label":"Enable Project Configuration"},
-  {"depends_on":"eval:doc.enable_project_configuration","fieldname":"reference_doctype","fieldtype":"Link","label":"Reference DocType","options":"DocType"},
-  {"depends_on":"eval:doc.enable_project_configuration","fieldname":"reference_fieldname","fieldtype":"Data","label":"Reference Fieldname","description":"Generated form field that links to the reference record."},
-  {"fieldname":"analysis_section","fieldtype":"Section Break","label":"Analysis"},
-  {"fieldname":"number_of_pages","fieldtype":"Int","label":"Number of Pages","read_only":1},
-  {"fieldname":"ai_provider","fieldtype":"Data","label":"AI Provider","read_only":1},
-  {"fieldname":"ai_model","fieldtype":"Data","label":"AI Model","read_only":1},
-  {"fieldname":"analysis_json","fieldtype":"Code","label":"Analysis JSON","options":"JSON","read_only":1},
-  {"fieldname":"analysis_error","fieldtype":"Small Text","label":"Analysis Error","read_only":1},
-  {"fieldname":"analysis_started_at","fieldtype":"Datetime","label":"Analysis Started At","read_only":1},
-  {"fieldname":"analysis_completed_at","fieldtype":"Datetime","label":"Analysis Completed At","read_only":1},
-  {"fieldname":"analyzed_by","fieldtype":"Link","label":"Analyzed By","options":"User","read_only":1},
-  {"fieldname":"rendering_section","fieldtype":"Section Break","label":"PDF Rendering"},
-  {"default":"PDF points (top-left origin)","fieldname":"coordinate_system","fieldtype":"Data","label":"Coordinate System","read_only":1},
-  {"fieldname":"default_font","fieldtype":"Data","label":"Default Font"},
-  {"default":"10","fieldname":"default_font_size","fieldtype":"Float","label":"Default Font Size"},
-  {"default":"6","fieldname":"minimum_font_size","fieldtype":"Float","label":"Minimum Font Size"},
-  {"default":"%d-%m-%Y","fieldname":"default_date_format","fieldtype":"Data","label":"Default Date Format"},
-  {"default":"1","fieldname":"enable_header_exclusion","fieldtype":"Check","label":"Ignore Header Region"},
-  {"fieldname":"header_height","fieldtype":"Float","label":"Header Height"},
-  {"default":"1","fieldname":"enable_footer_exclusion","fieldtype":"Check","label":"Ignore Footer Region"},
-  {"fieldname":"footer_height","fieldtype":"Float","label":"Footer Height"},
-  {"fieldname":"auto_attach_generated_pdf","fieldtype":"Check","label":"Auto Attach Generated PDF"},
-  {"fieldname":"sections","fieldtype":"Table","label":"Sections","options":"AI Form Section"},
-  {"fieldname":"fields","fieldtype":"Table","label":"Fields","options":"AI Form Field"}
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "",
+ "creation": "2026-09-30 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_title",
+  "template_code",
+  "source_type",
+  "source_pdf",
+  "status",
+  "document_category",
+  "form_group",
+  "target_area",
+  "generated_doctype",
+  "target_doctype",
+  "template_version",
+  "previous_revision",
+  "description",
+  "project_configuration_section",
+  "enable_project_configuration",
+  "reference_doctype",
+  "reference_fieldname",
+  "analysis_section",
+  "number_of_pages",
+  "ai_provider",
+  "ai_model",
+  "analysis_json",
+  "analysis_error",
+  "analysis_started_at",
+  "analysis_completed_at",
+  "analyzed_by",
+  "rendering_section",
+  "coordinate_system",
+  "default_font",
+  "default_font_size",
+  "minimum_font_size",
+  "default_date_format",
+  "enable_header_exclusion",
+  "header_height",
+  "enable_footer_exclusion",
+  "footer_height",
+  "auto_attach_generated_pdf",
+  "sections",
+  "fields"
  ],
- "module":"AI Form Builder", "name":"AI Form Template", "permissions":[{"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"AI Form Builder Manager","share":1,"write":1}], "sort_field":"modified", "sort_order":"DESC", "track_changes":1
+ "fields": [
+  {
+   "fieldname": "template_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Title",
+   "reqd": 1
+  },
+  {
+   "description": "Form code. Unique per form; all revisions of a form share it.",
+   "fieldname": "template_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Code",
+   "reqd": 1
+  },
+  {
+   "default": "AI PDF",
+   "fieldname": "source_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Source Type",
+   "options": "AI PDF\nManual\nExisting DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_pdf",
+   "fieldtype": "Attach",
+   "label": "Source PDF",
+   "mandatory_depends_on": "eval:doc.source_type=='AI PDF'"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nUploaded\nAnalyzing\nAnalysis Failed\nReview Required\nApproved\nGenerated\nPublished\nSuperseded\nDisabled",
+   "read_only": 1
+  },
+  {
+   "default": "Form",
+   "fieldname": "document_category",
+   "fieldtype": "Select",
+   "label": "Document Category",
+   "options": "Form\nChecklist\nRegister\nReport\nOther"
+  },
+  {
+   "fieldname": "form_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Form Group",
+   "options": "AI Form Group"
+  },
+  {
+   "fieldname": "generated_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Generated DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_doctype",
+   "fieldtype": "Link",
+   "label": "Map to Existing DocType",
+   "options": "DocType"
+  },
+  {
+   "default": "1",
+   "fieldname": "template_version",
+   "fieldtype": "Data",
+   "label": "Template Version"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "project_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Project Configuration"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_project_configuration",
+   "fieldtype": "Check",
+   "label": "Enable Project Configuration"
+  },
+  {
+   "depends_on": "eval:doc.enable_project_configuration",
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType"
+  },
+  {
+   "depends_on": "eval:doc.enable_project_configuration",
+   "description": "Generated form field that links to the reference record.",
+   "fieldname": "reference_fieldname",
+   "fieldtype": "Data",
+   "label": "Reference Fieldname"
+  },
+  {
+   "fieldname": "analysis_section",
+   "fieldtype": "Section Break",
+   "label": "Analysis"
+  },
+  {
+   "fieldname": "number_of_pages",
+   "fieldtype": "Int",
+   "label": "Number of Pages",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ai_provider",
+   "fieldtype": "Data",
+   "label": "AI Provider",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ai_model",
+   "fieldtype": "Data",
+   "label": "AI Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "analysis_json",
+   "fieldtype": "Code",
+   "label": "Analysis JSON",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "analysis_error",
+   "fieldtype": "Small Text",
+   "label": "Analysis Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "analysis_started_at",
+   "fieldtype": "Datetime",
+   "label": "Analysis Started At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "analysis_completed_at",
+   "fieldtype": "Datetime",
+   "label": "Analysis Completed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "analyzed_by",
+   "fieldtype": "Link",
+   "label": "Analyzed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rendering_section",
+   "fieldtype": "Section Break",
+   "label": "PDF Rendering"
+  },
+  {
+   "default": "PDF points (top-left origin)",
+   "fieldname": "coordinate_system",
+   "fieldtype": "Data",
+   "label": "Coordinate System",
+   "read_only": 1
+  },
+  {
+   "fieldname": "default_font",
+   "fieldtype": "Data",
+   "label": "Default Font"
+  },
+  {
+   "default": "10",
+   "fieldname": "default_font_size",
+   "fieldtype": "Float",
+   "label": "Default Font Size"
+  },
+  {
+   "default": "6",
+   "fieldname": "minimum_font_size",
+   "fieldtype": "Float",
+   "label": "Minimum Font Size"
+  },
+  {
+   "default": "%d-%m-%Y",
+   "fieldname": "default_date_format",
+   "fieldtype": "Data",
+   "label": "Default Date Format"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_header_exclusion",
+   "fieldtype": "Check",
+   "label": "Ignore Header Region"
+  },
+  {
+   "fieldname": "header_height",
+   "fieldtype": "Float",
+   "label": "Header Height"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_footer_exclusion",
+   "fieldtype": "Check",
+   "label": "Ignore Footer Region"
+  },
+  {
+   "fieldname": "footer_height",
+   "fieldtype": "Float",
+   "label": "Footer Height"
+  },
+  {
+   "fieldname": "auto_attach_generated_pdf",
+   "fieldtype": "Check",
+   "label": "Auto Attach Generated PDF"
+  },
+  {
+   "fieldname": "sections",
+   "fieldtype": "Table",
+   "label": "Sections",
+   "options": "AI Form Section"
+  },
+  {
+   "fieldname": "fields",
+   "fieldtype": "Table",
+   "label": "Fields",
+   "options": "AI Form Field"
+  },
+  {
+   "fieldname": "target_area",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Target Area",
+   "options": "AI Form Area"
+  },
+  {
+   "fieldname": "previous_revision",
+   "fieldtype": "Link",
+   "label": "Previous Revision",
+   "options": "AI Form Template",
+   "read_only": 1
+  }
+ ],
+ "modified": "2026-10-08 12:00:00.000000",
+ "module": "AI Form Builder",
+ "name": "AI Form Template",
+ "naming_rule": "By script",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "AI Form Builder Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }

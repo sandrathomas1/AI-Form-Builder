@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
+from ai_form_builder.services.form_registry import LOCKED_STATUSES
 from ai_form_builder.services.template_service import analyze_template as run_analysis
 from ai_form_builder.utils.validation import validate_mapping
 
@@ -16,11 +17,15 @@ def create_template_from_upload(template_title, template_code, source_pdf, docum
 	_manager()
 	if not source_pdf or not source_pdf.lower().endswith(".pdf"):
 		frappe.throw(_("Upload a PDF file before creating the template."))
-	doc = frappe.get_doc({
-		"doctype": "AI Form Template", "template_title": template_title,
-		"template_code": template_code, "source_pdf": source_pdf,
-		"document_category": document_category,
-	}).insert()
+	doc = frappe.get_doc(
+		{
+			"doctype": "AI Form Template",
+			"template_title": template_title,
+			"template_code": template_code,
+			"source_pdf": source_pdf,
+			"document_category": document_category,
+		}
+	).insert()
 	return {"name": doc.name, "status": doc.status}
 
 
@@ -29,8 +34,10 @@ def get_client_templates():
 	"""Small, role-checked data set for the client-facing landing page."""
 	_manager()
 	return frappe.get_all(
-		"AI Form Template", fields=["name", "template_title", "status", "generated_doctype", "modified"],
-		order_by="modified desc", limit_page_length=20,
+		"AI Form Template",
+		fields=["name", "template_title", "status", "generated_doctype", "modified"],
+		order_by="modified desc",
+		limit_page_length=20,
 	)
 
 
@@ -100,12 +107,22 @@ def save_mapping(template_name, fields, sections=None):
 	_manager()
 	template = frappe.get_doc("AI Form Template", template_name)
 	template.check_permission("write")
-	if template.status not in {"Review Required", "Approved"}:
+	if template.status in LOCKED_STATUSES:
+		frappe.throw(
+			_("This revision is {0}; create a revision to change its mapping.").format(_(template.status))
+		)
+	if template.status not in {"Review Required", "Approved"} and not template.generated_doctype:
 		frappe.throw(_("Analyze the template before editing its mapping."))
 	fields = frappe.parse_json(fields)
 	sections = frappe.parse_json(sections or "[]")
 	if not isinstance(fields, list) or not isinstance(sections, list):
 		frappe.throw(_("Mapping must contain field and section lists."))
+	# Once a DocType exists the mapping can only place that DocType's fields.
+	live_fields = (
+		{df.fieldname for df in frappe.get_meta(template.generated_doctype).fields}
+		if template.generated_doctype and frappe.db.exists("DocType", template.generated_doctype)
+		else None
+	)
 	template.set("fields", [])
 	fieldnames = set()
 	for row in fields:
@@ -115,6 +132,14 @@ def save_mapping(template_name, fields, sections=None):
 		if not mapping.ignore_field and mapping.fieldname in fieldnames:
 			frappe.throw(_("Fieldnames must be unique."))
 		fieldnames.add(mapping.fieldname)
+		if live_fields is not None and not mapping.ignore_field:
+			target = mapping.existing_field_mapping or mapping.fieldname
+			if target not in live_fields and mapping.get("mapping_status") != "Orphaned":
+				frappe.throw(
+					_("{0} is not a field of {1}. Add it with Frappe, then use Sync Fields.").format(
+						target, template.generated_doctype
+					)
+				)
 	template.set("sections", [])
 	for row in sections:
 		if not row.get("section_label") or not row.get("section_key"):
