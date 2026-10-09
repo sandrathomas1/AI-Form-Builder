@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "creation": "2026-10-09 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "field_name",
+  "label",
+  "field_type",
+  "value"
+ ],
+ "fields": [
+  {
+   "fieldname": "field_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Field Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Label"
+  },
+  {
+   "fieldname": "field_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Field Type"
+  },
+  {
+   "fieldname": "value",
+   "fieldtype": "Long Text",
+   "in_list_view": 1,
+   "label": "Value"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-10-09 12:00:00.000000",
+ "module": "AI Form Builder",
+ "name": "AI Form Record Value"
+}

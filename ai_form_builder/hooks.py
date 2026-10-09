@@ -12,6 +12,7 @@ doctype_js = {
 
 doctype_list_js = {
 	"AI Form Template": "public/js/ai_form_template_list.js",
+	"AI Form Record": "public/js/ai_form_record_list.js",
 }
 
 app_include_js = "/assets/ai_form_builder/js/project_form_runtime.js"
@@ -22,13 +23,20 @@ doc_events = {
 	}
 }
 
-app_include_css = "/assets/ai_form_builder/css/form_mapping_editor.css"
+app_include_css = [
+	"/assets/ai_form_builder/css/form_mapping_editor.css",
+	"/assets/ai_form_builder/css/afb_forms.css",
+]
 
 fixtures = [
 	{"dt": "Role", "filters": [["name", "in", ["AI Form Builder Manager", "AI Form Builder User"]]]},
 ]
 
 after_install = "ai_form_builder.install.after_install"
+
+# Optional Docuflow integration: adds the Form Library panel to Docuflow's /d
+# page from this app (no Docuflow file changes). A no-op without Docuflow.
+after_request = ["ai_form_builder.integrations.docuflow.inject_bridge"]
 
 # Apps
 # ------------------

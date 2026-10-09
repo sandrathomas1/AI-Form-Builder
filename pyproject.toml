@@ -10,6 +10,9 @@ dynamic = ["version"]
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
     "PyMuPDF>=1.24.0",
+    # Claude reads client sheets (structured outputs + server-side fallback).
+    "anthropic>=0.122",
+    "openpyxl>=3.1",
 ]
 
 [build-system]

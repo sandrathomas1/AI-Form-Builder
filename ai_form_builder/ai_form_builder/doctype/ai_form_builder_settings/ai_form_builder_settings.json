@@ -1,1 +1,125 @@
-{"actions":[],"doctype":"DocType","doctype":"DocType","engine":"InnoDB","field_order":["enabled","ai_provider","ai_model","api_key","maximum_pdf_size_mb","maximum_pages","default_font","default_font_size","minimum_font_size","default_date_format","automatically_attach_generated_pdf","enable_background_processing"],"fields":[{"default":"1","fieldname":"enabled","fieldtype":"Check","label":"Enabled"},{"default":"OpenAI","fieldname":"ai_provider","fieldtype":"Select","label":"AI Provider","options":"OpenAI"},{"fieldname":"ai_model","fieldtype":"Data","label":"AI Model"},{"fieldname":"api_key","fieldtype":"Password","label":"API Key"},{"default":"25","fieldname":"maximum_pdf_size_mb","fieldtype":"Int","label":"Maximum PDF Size (MB)"},{"default":"20","fieldname":"maximum_pages","fieldtype":"Int","label":"Maximum Pages"},{"default":"helv","fieldname":"default_font","fieldtype":"Data","label":"Default Font"},{"default":"10","fieldname":"default_font_size","fieldtype":"Float","label":"Default Font Size"},{"default":"6","fieldname":"minimum_font_size","fieldtype":"Float","label":"Minimum Font Size"},{"default":"%d-%m-%Y","fieldname":"default_date_format","fieldtype":"Data","label":"Default Date Format"},{"default":"1","fieldname":"automatically_attach_generated_pdf","fieldtype":"Check","label":"Automatically Attach Generated PDF"},{"default":"1","fieldname":"enable_background_processing","fieldtype":"Check","label":"Enable Background Processing"}],"issingle":1,"module":"AI Form Builder","name":"AI Form Builder Settings","permissions":[{"read":1,"write":1,"role":"AI Form Builder Manager"}]}
+{
+ "actions": [],
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "ai_provider",
+  "ai_model",
+  "api_key",
+  "maximum_pdf_size_mb",
+  "maximum_pages",
+  "default_font",
+  "default_font_size",
+  "minimum_font_size",
+  "default_date_format",
+  "automatically_attach_generated_pdf",
+  "enable_background_processing",
+  "form_context_section",
+  "default_reference_doctype",
+  "default_reference_fieldname"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "default": "Anthropic",
+   "fieldname": "ai_provider",
+   "fieldtype": "Select",
+   "label": "AI Provider",
+   "options": "Anthropic\nOpenAI"
+  },
+  {
+   "description": "Blank = the provider's default (claude-sonnet-5-5 for Anthropic). When the key is blank too, Docuflow's Copilot provider config is used if present.",
+   "fieldname": "ai_model",
+   "fieldtype": "Data",
+   "label": "AI Model"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "label": "API Key"
+  },
+  {
+   "default": "25",
+   "fieldname": "maximum_pdf_size_mb",
+   "fieldtype": "Int",
+   "label": "Maximum PDF Size (MB)"
+  },
+  {
+   "default": "20",
+   "fieldname": "maximum_pages",
+   "fieldtype": "Int",
+   "label": "Maximum Pages"
+  },
+  {
+   "default": "helv",
+   "fieldname": "default_font",
+   "fieldtype": "Data",
+   "label": "Default Font"
+  },
+  {
+   "default": "10",
+   "fieldname": "default_font_size",
+   "fieldtype": "Float",
+   "label": "Default Font Size"
+  },
+  {
+   "default": "6",
+   "fieldname": "minimum_font_size",
+   "fieldtype": "Float",
+   "label": "Minimum Font Size"
+  },
+  {
+   "default": "%d-%m-%Y",
+   "fieldname": "default_date_format",
+   "fieldtype": "Data",
+   "label": "Default Date Format"
+  },
+  {
+   "default": "1",
+   "fieldname": "automatically_attach_generated_pdf",
+   "fieldtype": "Check",
+   "label": "Automatically Attach Generated PDF"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_background_processing",
+   "fieldtype": "Check",
+   "label": "Enable Background Processing"
+  },
+  {
+   "fieldname": "form_context_section",
+   "fieldtype": "Section Break",
+   "label": "Form Context"
+  },
+  {
+   "description": "Context record new project-configurable forms link to (e.g. a Project DocType). Blank uses the Docuflow project when Docuflow is installed.",
+   "fieldname": "default_reference_doctype",
+   "fieldtype": "Link",
+   "label": "Default Reference DocType",
+   "options": "DocType"
+  },
+  {
+   "default": "project",
+   "fieldname": "default_reference_fieldname",
+   "fieldtype": "Data",
+   "label": "Default Reference Fieldname"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2026-10-09 12:00:00.000000",
+ "module": "AI Form Builder",
+ "name": "AI Form Builder Settings",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "AI Form Builder Manager",
+   "write": 1
+  }
+ ]
+}
