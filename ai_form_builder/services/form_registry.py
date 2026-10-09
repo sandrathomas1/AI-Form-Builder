@@ -20,6 +20,9 @@ from ai_form_builder.utils.validation import FIELDNAME_RE, sanitize_fieldname
 TEMPLATE = "AI Form Template"
 # Statuses whose DocType may be offered to projects.
 LIVE_STATUSES = ("Approved", "Generated", "Published")
+# Spec-form statuses a manager still sees in the library while reviewing.
+DRAFT_STATUSES = ("Uploaded", "Analyzing", "Analysis Failed", "Review Required", "Approved")
+SPEC_RECORD = "AI Form Record"
 # Statuses whose mapping is frozen; change them through a new revision.
 LOCKED_STATUSES = ("Published", "Superseded")
 LAYOUT_FIELD_TYPES = {
@@ -77,6 +80,22 @@ def desk_url(doctype, view="new", values=None):
 
 	url = "/app/" + quote(doctype.lower().replace(" ", "-")) + ("/new" if view == "new" else "")
 	return url + ("?" + urlencode(values) if values else "")
+
+
+def spec_urls(template_name, reference_name=None):
+	"""Desk links for a spec form: new record, its records, and the review page."""
+	from urllib.parse import quote, urlencode
+
+	new_args = {"template": template_name}
+	list_args = {"form_template": template_name}
+	if reference_name:
+		new_args["reference_name"] = reference_name
+		list_args["reference_name"] = reference_name
+	return {
+		"new_url": "/app/afb-form?" + urlencode(new_args),
+		"list_url": "/app/ai-form-record?" + urlencode(list_args),
+		"review_url": "/app/afb-form-review/" + quote(template_name),
+	}
 
 
 def edit_route(doctype):
@@ -153,6 +172,7 @@ def register_existing_doctype(
 			"template_title": template_title,
 			"template_code": template_code,
 			"source_type": "Existing DocType",
+			"storage_mode": "DocType",
 			"status": "Generated",
 			"target_area": target_area,
 			"form_group": form_group,
@@ -260,6 +280,10 @@ def publish(template):
 	profiles move to this revision so projects keep their settings.
 	"""
 	if not template.generated_doctype:
+		from ai_form_builder.services import spec_service
+
+		if spec_service.is_spec_form(template):
+			return spec_service.publish(template)
 		frappe.throw(_("Create the form's DocType before publishing it."))
 	if template.status in ("Superseded", "Disabled"):
 		frappe.throw(_("A {0} revision cannot be published.").format(_(template.status)))
@@ -312,13 +336,14 @@ def _group_path(group_name, groups):
 	return path
 
 
-def library_rows(reference_doctype, area=None):
+def library_rows(reference_doctype, area=None, include_drafts=False):
+	statuses = list(LIVE_STATUSES) + (list(DRAFT_STATUSES) if include_drafts else [])
 	templates = frappe.get_all(
 		TEMPLATE,
 		filters={
 			"enable_project_configuration": 1,
 			"reference_doctype": reference_doctype,
-			"status": ["in", LIVE_STATUSES],
+			"status": ["in", statuses],
 		},
 		fields=[
 			"name",
@@ -333,6 +358,7 @@ def library_rows(reference_doctype, area=None):
 			"source_pdf",
 			"status",
 			"source_type",
+			"storage_mode",
 		],
 	)
 	groups = {
@@ -347,6 +373,11 @@ def library_rows(reference_doctype, area=None):
 	}
 	rows = []
 	for template in templates:
+		template.is_spec = (template.storage_mode or "Spec") == "Spec" and not template.generated_doctype
+		if template.is_spec and template.status not in ("Published", *DRAFT_STATUSES):
+			continue
+		if not template.is_spec and template.status not in LIVE_STATUSES:
+			continue
 		template_area = _area_of(template, groups)
 		if area and template_area != area:
 			continue
@@ -371,9 +402,9 @@ def library_rows(reference_doctype, area=None):
 	return rows
 
 
-def get_setup_forms(reference_doctype, reference_name):
+def get_setup_forms(reference_doctype, reference_name, include_drafts=False):
 	"""Every project-configurable form with this project's enablement and profile."""
-	rows = library_rows(reference_doctype)
+	rows = library_rows(reference_doctype, include_drafts=include_drafts)
 	configurations = {
 		row.form_template: row
 		for row in frappe.get_all(
@@ -407,9 +438,29 @@ def get_enabled_forms(reference_doctype, reference_name, area=None):
 	)
 	forms = []
 	for row in library_rows(reference_doctype, area=area):
-		if row.name not in enabled or not row.generated_doctype:
+		if row.name not in enabled:
 			continue
-		if not frappe.has_permission(row.generated_doctype, "read"):
+		if row.is_spec:
+			if row.status != "Published" or not frappe.has_permission(SPEC_RECORD, "read"):
+				continue
+			forms.append(
+				{
+					"form_template": row.name,
+					"title": row.template_title,
+					"code": row.template_code,
+					"revision": row.template_version,
+					"doctype": None,
+					"is_spec": True,
+					"area": row.area,
+					"group": row.group,
+					"group_path": row.group_path,
+					"reference_fieldname": row.reference_fieldname,
+					"can_create": frappe.has_permission(SPEC_RECORD, "create"),
+					"has_pdf": True,
+				}
+			)
+			continue
+		if not row.generated_doctype or not frappe.has_permission(row.generated_doctype, "read"):
 			continue
 		forms.append(
 			{

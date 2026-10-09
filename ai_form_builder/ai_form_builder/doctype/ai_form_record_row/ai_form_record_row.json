@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "creation": "2026-10-09 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "row_group",
+  "row_no",
+  "is_preprinted",
+  "cell_values"
+ ],
+ "fields": [
+  {
+   "fieldname": "row_group",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Grid",
+   "reqd": 1
+  },
+  {
+   "fieldname": "row_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Row No"
+  },
+  {
+   "fieldname": "is_preprinted",
+   "fieldtype": "Check",
+   "label": "Pre-printed"
+  },
+  {
+   "fieldname": "cell_values",
+   "fieldtype": "Long Text",
+   "in_list_view": 1,
+   "label": "Cell Values (JSON)"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-10-09 12:00:00.000000",
+ "module": "AI Form Builder",
+ "name": "AI Form Record Row"
+}

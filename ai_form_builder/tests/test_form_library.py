@@ -612,6 +612,8 @@ class TestPdfAndAiRegression(FormLibraryTestCase):
 				"template_title": "AFB Test AI Form",
 				"template_code": "AFB-T-AI",
 				"source_pdf": url,
+				# The DocType-per-form path, kept for forms made before spec forms.
+				"storage_mode": "DocType",
 			}
 		).insert()
 		self.assertEqual(template.status, "Uploaded")
@@ -868,6 +870,7 @@ class TestDocuflowPanel(FormLibraryTestCase):
 			self.assertEqual(
 				(template.target_area, template.form_group, template.status), ("Quality", "QC", "Uploaded")
 			)
+			self.assertEqual((template.storage_mode, template.source_kind), ("Spec", "PDF"))
 			self.assertEqual((template.reference_doctype, template.reference_fieldname), (PROJECT, "project"))
 		finally:
 			settings.default_reference_doctype = None

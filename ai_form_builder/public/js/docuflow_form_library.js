@@ -177,13 +177,15 @@
 		if (form.new_url) actions.push(`<a class="afbdf-btn afbdf-primary" href="${esc(form.new_url)}" target="_blank" rel="noopener">New</a>`);
 		if (form.list_url) actions.push(`<a class="afbdf-btn" href="${esc(form.list_url)}" target="_blank" rel="noopener">Records</a>`);
 		if (manage) {
+			if (form.is_spec && form.review_url)
+				actions.push(`<a class="afbdf-btn" href="${esc(form.review_url)}" target="_blank" rel="noopener" title="Check the fields and the print against the client's sheet">${form.status === "Published" ? "View form" : "Review &amp; publish"}</a>`);
 			if (form.edit_url) actions.push(`<a class="afbdf-btn" href="${esc(form.edit_url)}" target="_blank" rel="noopener" title="Add and arrange fields in Frappe's Form Builder">Edit fields</a>`);
 			if (form.doctype) actions.push(`<button type="button" class="afbdf-btn" data-action="sync" data-template="${esc(form.form_template)}" title="Pick up fields added in Form Builder, then publish">Sync &amp; publish</button>`);
 			if (form.configure_url && form.enabled) actions.push(`<a class="afbdf-btn" href="${esc(form.configure_url)}" target="_blank" rel="noopener" title="Show, hide or require fields for this project">Project fields</a>`);
-			if (!form.doctype) actions.push(`<a class="afbdf-btn" href="${esc(form.template_url)}" target="_blank" rel="noopener">Review AI fields</a>`);
+			if (!form.doctype && !form.is_spec) actions.push(`<a class="afbdf-btn" href="${esc(form.template_url)}" target="_blank" rel="noopener">Review AI fields</a>`);
 		}
 		const toggle =
-			manage && form.doctype
+			manage && (form.doctype || (form.is_spec && form.status === "Published"))
 				? `<label class="afbdf-toggle" title="${state.project ? "Use this form on the project" : "Choose a project first"}">
 						<input type="checkbox" data-action="enable" data-template="${esc(form.form_template)}" ${form.enabled ? "checked" : ""} ${state.project ? "" : "disabled"}>
 						<span>Use on project</span></label>`
@@ -279,9 +281,12 @@
 	// ---------------------------------------------------------------- create new form
 	const METHODS = [
 		["manual", "Create manually (no code)", "Name the form, then add fields with Frappe's drag-and-drop Form Builder. No AI needed."],
-		["ai", "Create with AI from PDF", "Upload the client's PDF. AI detects the sections and fields for you to review."],
+		["ai", "Create from the client's sheet (AI)", "Upload the client's PDF, Excel or Word sheet. AI reads its boxes and tables; you review and publish. No DocType is created."],
 		["existing", "Use an existing DocType", "Put a DocType that already exists into this area's forms."],
 	];
+
+	const SHEET_TYPES =
+		".pdf,.xlsx,.xlsm,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 	function modal(html) {
 		closeModal();
@@ -349,7 +354,7 @@
 	}
 
 	function openMethod(method) {
-		const titles = { manual: "Create manually (no code)", ai: "Create with AI from PDF", existing: "Use an existing DocType" };
+		const titles = { manual: "Create manually (no code)", ai: "Create from the client's sheet (AI)", existing: "Use an existing DocType" };
 		let fields = "";
 		if (method === "manual") {
 			fields = `${commonFields()}
@@ -360,8 +365,9 @@
 				${projectOption()}`;
 		} else if (method === "ai") {
 			fields = `${commonFields()}
-				<label class="afbdf-field"><span>Client PDF *</span><input type="file" name="pdf" accept="application/pdf" required></label>
-				<label class="afbdf-check"><input type="checkbox" name="enable_project_configuration" checked> Project configurable (each project picks its fields)</label>`;
+				<label class="afbdf-field"><span>Client sheet (PDF, Excel or Word) *</span><input type="file" name="pdf" accept="${SHEET_TYPES}" required></label>
+				<label class="afbdf-check"><input type="checkbox" name="enable_project_configuration" checked> Project configurable (each project picks its fields)</label>
+				${projectOption()}`;
 		} else {
 			fields = `
 				<label class="afbdf-field"><span>Document type *</span><input name="doctype" list="afbdf-doctypes" required autocomplete="off" placeholder="Start typing a DocType name"></label>
@@ -453,13 +459,14 @@
 				submit.textContent = "Creating…";
 				const created = await call("ai_form_builder.api.template.create_template_from_upload", { ...base, source_pdf: url });
 				await call("ai_form_builder.api.template.analyze_template", { template_name: created.name });
+				await enableIfAsked(form, created.name, base.enable_project_configuration);
 				showNextSteps({
-					title: `${base.template_title}: AI is reading the PDF`,
+					title: `${base.template_title}: AI is reading the sheet`,
 					steps: [
-						"Open the form and review the detected fields (Review Mapping), then Approve Mapping.",
-						"Press Generate DocType. The form then appears here; tick Use on project.",
+						"Open the review page: compare our print with the client's sheet and correct any field.",
+						"Press Publish. The form is saved as data only (no DocType), then appears here with New and Records.",
 					],
-					primary: { label: "Review AI fields", href: `/app/ai-form-template/${encodeURIComponent(created.name)}` },
+					primary: { label: "Review form", href: `/app/afb-form-review/${encodeURIComponent(created.name)}` },
 				});
 			} else {
 				submit.textContent = "Adding…";

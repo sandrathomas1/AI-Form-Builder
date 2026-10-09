@@ -17,6 +17,26 @@ frappe.ui.form.on("AI Form Template", {
 		};
 		const locked = ["Published", "Superseded"].includes(doc.status);
 
+		// Spec forms: the form is data (spec_json); no DocType is ever generated.
+		if ((doc.storage_mode || "Spec") === "Spec" && !doc.generated_doctype) {
+			const form = __("Form");
+			frm.add_custom_button(__("Review Form"), () => frappe.set_route("afb-form-review", doc.name), form);
+			if (doc.status === "Published") {
+				frm.add_custom_button(__("Records"), () => frappe.set_route("List", "AI Form Record", { form_template: doc.name }), form);
+				frm.add_custom_button(__("Create Revision"), () =>
+					call("ai_form_builder.api.forms.create_revision", {}, (name) => frappe.set_route("Form", "AI Form Template", name)),
+					__("Revision"));
+			}
+			if (doc.enable_project_configuration && doc.status === "Published") {
+				frm.add_custom_button(__("Project Setup"), () => frappe.set_route("project-form-setup"), form);
+			}
+			if (["Uploaded", "Analysis Failed", "Review Required"].includes(doc.status) && doc.source_pdf) {
+				frm.add_custom_button(__("Read Sheet (AI)"), () => call("ai_form_builder.api.template.analyze_template"));
+			}
+			if (locked) frm.set_intro(__("This revision is {0}; use Create Revision to change it.", [__(doc.status)]));
+			return;
+		}
+
 		// Existing AI workflow, until the DocType exists.
 		if (doc.source_type === "AI PDF" && !doc.generated_doctype) {
 			frm.add_custom_button(__("Analyze PDF"), () => call("ai_form_builder.api.template.analyze_template"));

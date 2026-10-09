@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
+from ai_form_builder.services.extract import kind_of
 from ai_form_builder.services.form_registry import LOCKED_STATUSES, default_reference
 from ai_form_builder.services.template_service import analyze_template as run_analysis
 from ai_form_builder.utils.validation import validate_mapping
@@ -23,8 +24,9 @@ def create_template_from_upload(
 ):
 	"""Website frontend entrypoint; file upload remains Frappe's standard endpoint."""
 	_manager()
-	if not source_pdf or not source_pdf.lower().endswith(".pdf"):
-		frappe.throw(_("Upload a PDF file before creating the template."))
+	kind = kind_of(source_pdf)
+	if not kind:
+		frappe.throw(_("Upload the client's sheet as a PDF, Excel (.xlsx) or Word (.docx) file."))
 	reference_doctype = reference_fieldname = None
 	if cint(enable_project_configuration):
 		reference_doctype, reference_fieldname = default_reference()
@@ -34,6 +36,8 @@ def create_template_from_upload(
 			"template_title": template_title,
 			"template_code": template_code,
 			"source_pdf": source_pdf,
+			"source_kind": kind,
+			"storage_mode": "Spec",
 			"document_category": document_category,
 			"target_area": target_area,
 			"form_group": form_group,
@@ -51,7 +55,7 @@ def get_client_templates():
 	_manager()
 	return frappe.get_all(
 		"AI Form Template",
-		fields=["name", "template_title", "status", "generated_doctype", "modified"],
+		fields=["name", "template_title", "status", "generated_doctype", "storage_mode", "modified"],
 		order_by="modified desc",
 		limit_page_length=20,
 	)
@@ -64,6 +68,12 @@ def analyze_template(template_name):
 	template.check_permission("write")
 	if template.status == "Analyzing":
 		frappe.throw(_("Analysis is already running."))
+	from ai_form_builder.services.spec_service import is_spec_form
+
+	if is_spec_form(template):
+		from ai_form_builder.api.spec_forms import queue_analysis
+
+		return queue_analysis(template)
 	settings = frappe.get_single("AI Form Builder Settings")
 	template.db_set("status", "Analyzing")
 	if settings.enable_background_processing:

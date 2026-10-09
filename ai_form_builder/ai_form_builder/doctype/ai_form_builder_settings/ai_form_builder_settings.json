@@ -27,13 +27,14 @@
    "label": "Enabled"
   },
   {
-   "default": "OpenAI",
+   "default": "Anthropic",
    "fieldname": "ai_provider",
    "fieldtype": "Select",
    "label": "AI Provider",
-   "options": "OpenAI"
+   "options": "Anthropic\nOpenAI"
   },
   {
+   "description": "Blank = the provider's default (claude-sonnet-5-5 for Anthropic). When the key is blank too, Docuflow's Copilot provider config is used if present.",
    "fieldname": "ai_model",
    "fieldtype": "Data",
    "label": "AI Model"
@@ -111,7 +112,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2026-10-08 12:00:00.000000",
+ "modified": "2026-10-09 12:00:00.000000",
  "module": "AI Form Builder",
  "name": "AI Form Builder Settings",
  "permissions": [

@@ -9,7 +9,9 @@
   "template_title",
   "template_code",
   "source_type",
+  "storage_mode",
   "source_pdf",
+  "source_kind",
   "status",
   "document_category",
   "form_group",
@@ -23,6 +25,8 @@
   "enable_project_configuration",
   "reference_doctype",
   "reference_fieldname",
+  "spec_section",
+  "spec_json",
   "analysis_section",
   "number_of_pages",
   "ai_provider",
@@ -73,9 +77,10 @@
    "reqd": 1
   },
   {
+   "description": "PDF, Excel (.xlsx) or Word (.docx) sheet the form is built from.",
    "fieldname": "source_pdf",
    "fieldtype": "Attach",
-   "label": "Source PDF",
+   "label": "Source Document",
    "mandatory_depends_on": "eval:doc.source_type=='AI PDF'"
   },
   {
@@ -296,9 +301,38 @@
    "label": "Previous Revision",
    "options": "AI Form Template",
    "read_only": 1
+  },
+  {
+   "default": "Spec",
+   "description": "Spec: the form is data (no DocType is created). DocType: legacy forms backed by their own DocType.",
+   "fieldname": "storage_mode",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Storage",
+   "options": "Spec\nDocType"
+  },
+  {
+   "fieldname": "source_kind",
+   "fieldtype": "Select",
+   "label": "Source Kind",
+   "options": "\nPDF\nExcel\nWord",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "spec_section",
+   "fieldtype": "Section Break",
+   "label": "Form Spec"
+  },
+  {
+   "description": "Fields, grids and page layout. Edit through Review Form; publishing writes no DocType.",
+   "fieldname": "spec_json",
+   "fieldtype": "Code",
+   "label": "Form Spec (JSON)",
+   "options": "JSON"
   }
  ],
- "modified": "2026-10-08 12:00:00.000000",
+ "modified": "2026-10-09 12:00:00.000000",
  "module": "AI Form Builder",
  "name": "AI Form Template",
  "naming_rule": "By script",

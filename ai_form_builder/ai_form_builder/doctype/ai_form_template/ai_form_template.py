@@ -53,13 +53,24 @@ class AIFormTemplate(Document):
 	def _validate_source_pdf(self):
 		if not self.source_pdf:
 			return
+		from ai_form_builder.services.extract import kind_of
+
 		file_doc = frappe.get_doc("File", {"file_url": self.source_pdf})
-		if not file_doc.file_name.lower().endswith(".pdf"):
-			frappe.throw(_("Only PDF files may be used as form templates."))
+		kind = kind_of(file_doc.file_name)
+		is_spec = (self.storage_mode or "Spec") == "Spec" and not self.generated_doctype
+		if kind != "PDF" and not (is_spec and kind):
+			frappe.throw(
+				_(
+					"Spec forms are built from a PDF, Excel (.xlsx) or Word (.docx) sheet; DocType forms from a PDF."
+				)
+				if is_spec
+				else _("Only PDF files may be used as form templates.")
+			)
+		self.source_kind = kind
 		settings = frappe.get_single("AI Form Builder Settings")
 		if file_doc.file_size and file_doc.file_size > (settings.maximum_pdf_size_mb or 25) * 1024 * 1024:
-			frappe.throw(_("PDF exceeds the configured maximum size."))
-		if not self.number_of_pages or self.has_value_changed("source_pdf"):
+			frappe.throw(_("The file exceeds the configured maximum size."))
+		if kind == "PDF" and (not self.number_of_pages or self.has_value_changed("source_pdf")):
 			# A PDF attached without AI analysis (manual or existing forms) still
 			# needs its page count for the mapping editor's page validation.
 			import fitz

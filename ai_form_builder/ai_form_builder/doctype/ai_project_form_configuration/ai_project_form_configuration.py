@@ -11,7 +11,11 @@ class AIProjectFormConfiguration(Document):
 			self.generated_doctype = frappe.db.get_value(
 				"AI Form Template", self.form_template, "generated_doctype"
 			)
-		if not self.generated_doctype:
+		if (
+			not self.generated_doctype
+			and frappe.db.get_value("AI Form Template", self.form_template, "storage_mode") != "Spec"
+		):
+			# Spec forms have no DocType: their records are AI Form Record rows.
 			frappe.throw(_("The selected template has no generated DocType."))
 		existing = frappe.db.exists(
 			"AI Project Form Configuration",

@@ -100,6 +100,7 @@ def create_manual_form(
 			"template_title": template_title,
 			"template_code": template_code,
 			"source_type": "Manual",
+			"storage_mode": "DocType",
 			"status": "Generated",
 			"target_area": target_area,
 			"form_group": form_group,

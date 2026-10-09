@@ -243,14 +243,40 @@ def get_area_forms(area=None, project=None):
 	forms = []
 	if can_manage():
 		rows = (
-			form_registry.get_setup_forms(doctype, project)
+			form_registry.get_setup_forms(doctype, project, include_drafts=True)
 			if project
-			else form_registry.library_rows(doctype)
+			else form_registry.library_rows(doctype, include_drafts=True)
 		)
 		for row in rows:
 			if row.area not in wanted:
 				continue
 			enabled = bool(row.get("enabled"))
+			if row.is_spec:
+				live = row.status == "Published"
+				urls = form_registry.spec_urls(row.name, project)
+				forms.append(
+					{
+						"form_template": row.name,
+						"title": row.template_title,
+						"code": row.template_code,
+						"status": row.status,
+						"source_type": row.source_type,
+						"doctype": None,
+						"is_spec": True,
+						"area": row.area,
+						"group": row.group,
+						"enabled": enabled,
+						"review_url": urls["review_url"],
+						"template_url": f"/app/ai-form-template/{row.name}",
+						"configure_url": "/app/project-form-setup?"
+						+ urlencode({"reference_doctype": doctype, "reference_name": project})
+						if project and live
+						else None,
+						"new_url": urls["new_url"] if enabled and live and project else None,
+						"list_url": urls["list_url"] if enabled and live and project else None,
+					}
+				)
+				continue
 			forms.append(
 				{
 					"form_template": row.name,
@@ -286,8 +312,14 @@ def get_area_forms(area=None, project=None):
 		for row in form_registry.get_enabled_forms(doctype, project):
 			if row["area"] not in wanted:
 				continue
-			values = {row["reference_fieldname"]: project}
 			row["enabled"] = True
+			if row.get("is_spec"):
+				urls = form_registry.spec_urls(row["form_template"], project)
+				row["new_url"] = urls["new_url"] if row["can_create"] else None
+				row["list_url"] = urls["list_url"]
+				forms.append(row)
+				continue
+			values = {row["reference_fieldname"]: project}
 			row["new_url"] = (
 				form_registry.desk_url(row["doctype"], "new", values) if row["can_create"] else None
 			)

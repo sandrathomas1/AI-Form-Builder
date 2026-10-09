@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "autoname": "",
+ "creation": "2026-10-09 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "form_template",
+  "form_title",
+  "form_code",
+  "template_version",
+  "column_break_main",
+  "reference_doctype",
+  "reference_name",
+  "status",
+  "record_date",
+  "data_section",
+  "values",
+  "rows",
+  "snapshot_section",
+  "spec_snapshot",
+  "project_configuration",
+  "configuration_snapshot"
+ ],
+ "fields": [
+  {
+   "fieldname": "form_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Form",
+   "options": "AI Form Template",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "form_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "read_only": 1
+  },
+  {
+   "fieldname": "form_code",
+   "fieldtype": "Data",
+   "label": "Form Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "template_version",
+   "fieldtype": "Data",
+   "label": "Form Revision",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Reference",
+   "options": "reference_doctype",
+   "search_index": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nCompleted\nCancelled"
+  },
+  {
+   "default": "Today",
+   "fieldname": "record_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "data_section",
+   "fieldtype": "Section Break",
+   "label": "Entered Data"
+  },
+  {
+   "fieldname": "values",
+   "fieldtype": "Table",
+   "label": "Values",
+   "options": "AI Form Record Value"
+  },
+  {
+   "fieldname": "rows",
+   "fieldtype": "Table",
+   "label": "Grid Rows",
+   "options": "AI Form Record Row"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "snapshot_section",
+   "fieldtype": "Section Break",
+   "label": "Form Snapshot"
+  },
+  {
+   "fieldname": "spec_snapshot",
+   "fieldtype": "Code",
+   "label": "Spec Snapshot",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project_configuration",
+   "fieldtype": "Link",
+   "label": "Project Configuration",
+   "options": "AI Project Form Configuration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "configuration_snapshot",
+   "fieldtype": "Code",
+   "label": "Configuration Snapshot",
+   "options": "JSON",
+   "read_only": 1
+  }
+ ],
+ "modified": "2026-10-09 12:00:00.000000",
+ "module": "AI Form Builder",
+ "name": "AI Form Record",
+ "naming_rule": "By script",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "AI Form Builder Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "AI Form Builder User",
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "form_title",
+ "track_changes": 1
+}
